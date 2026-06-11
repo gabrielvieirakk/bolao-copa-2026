@@ -1,7 +1,7 @@
 import express from "express";
 import { auth } from "../middleware.js";
-import { getAllUsers, getAllPredictions, getAllSpecialBets, getAllResults, getAllMatches } from "../db.js";
-import { PONTOS, pontuarJogo, classePontuacao } from "../../shared/scoring.js";
+import { getAllUsers, getAllPredictions, getAllSpecialBets, getAllResults, getAllMatches, getConfig } from "../db.js";
+import { PONTOS, pontuarJogo, classePontuacao, norm } from "../../shared/scoring.js";
 import { RODADAS, ESPECIAIS_DEFS } from "../../shared/data.js";
 
 const router = express.Router();
@@ -13,6 +13,7 @@ router.get("/", auth, (req, res) => {
   const especiais = getAllSpecialBets();
   const results = getAllResults();
   const matches = getAllMatches();
+  const especiaisOficiais = getConfig("especiaisOficiais") ?? {};
 
   const resultsMap = Object.fromEntries(results.map((r) => [r.match_id, { m: r.gols_m, v: r.gols_v }]));
   const matchesMap = Object.fromEntries(matches.map((m) => [m.id, m]));
@@ -41,17 +42,24 @@ router.get("/", auth, (req, res) => {
       const res = resultsMap[jid];
       const jogo = matchesMap[jid];
       if (res && jogo && PONTOS[jogo.fase]) {
-        const p = pontuarJogo(palpite, res, PONTOS[jogo.fase]);
-        placaresPts += p;
+        placaresPts += pontuarJogo(palpite, res, PONTOS[jogo.fase]);
         if (classePontuacao(palpite, res) === "exato") exatos++;
       }
     }
 
     for (const d of ESPECIAIS_DEFS) {
-      // especiaisOficiais vem do config — passamos no response
+      const oficial = especiaisOficiais[d.key];
+      const aposta = uEsp[d.key];
+      if (oficial && aposta && norm(oficial) === norm(aposta)) {
+        especiaisPts += d.pts;
+      }
     }
 
-    return { id: u.id, email: u.email, nome: u.nome, isAdmin: !!u.is_admin, total: placaresPts, placaresPts, exatos };
+    return {
+      id: u.id, nome: u.nome, isAdmin: !!u.is_admin,
+      placaresPts, especiaisPts, exatos,
+      total: placaresPts + especiaisPts,
+    };
   });
 
   // Craque da rodada

@@ -796,7 +796,7 @@ function Ranking({ myId }) {
                   {l.nome === myId && <span className="tag tag-gold">você</span>}
                   {l.exatos > 0 && l.exatos === maxExatos && <span className="tag tag-gold">🎯 cravador</span>}
                 </div>
-                <div className="rank-sub">{l.exatos} exato(s) · {l.placaresPts} de jogos</div>
+                <div className="rank-sub">{l.exatos} exato(s) · {l.placaresPts} jogos{l.especiaisPts > 0 ? ` · ${l.especiaisPts} especiais` : ""}</div>
               </div>
               <div className="rank-pts">{l.total}<small>pontos</small></div>
             </div>
@@ -932,15 +932,23 @@ function AdminResultados({ gstate, onReload, showToast }) {
   const lista = (gstate?.matches || []).filter((j) => j.fase === faseSel).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
 
   async function salvarResultado(jid, m, v) {
-    if (m === "" || v === "") return;
-    await api.post("/api/admin/resultado", { matchId: jid, m: parseInt(m), v: parseInt(v) });
-    await onReload();
-    showToast("Resultado salvo ✓");
+    if (m === "" || v === "") { showToast("Preencha os dois placares"); return; }
+    try {
+      await api.post("/api/admin/resultado", { matchId: jid, m: parseInt(m), v: parseInt(v) });
+      await onReload();
+      showToast("Resultado salvo ✓");
+    } catch (e) {
+      showToast("Erro: " + e.message);
+    }
   }
   async function limparResultado(jid) {
-    await api.delete(`/api/admin/resultado/${jid}`);
-    await onReload();
-    showToast("Resultado removido");
+    try {
+      await api.delete(`/api/admin/resultado/${jid}`);
+      await onReload();
+      showToast("Resultado removido");
+    } catch (e) {
+      showToast("Erro: " + e.message);
+    }
   }
 
   return (
