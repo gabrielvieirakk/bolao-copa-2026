@@ -55,8 +55,8 @@ export const RODADAS = [
   { key: "final", label: "Final", fn: (j) => j.fase === "final" },
 ];
 
-// 11/06/2026 às 16:00 BRT = 19:00 UTC
-export const ESPECIAIS_DEADLINE = "2026-06-11T19:00:00.000Z";
+// 11/06/2026 às 23:00 BRT = 12/06/2026 às 02:00 UTC
+export const ESPECIAIS_DEADLINE = "2026-06-12T02:00:00.000Z";
 
 export const ESPECIAIS_DEFS = [
   { key: "campeao",    label: "Campeão",              tipo: "selecao", pts: 25 },
