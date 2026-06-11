@@ -5,7 +5,7 @@ import { api } from "./api.js";
 // Em produção o Vite resolve estes imports via alias configurado no vite.config.js
 import {
   GRUPOS, FLAGS, TODAS_SELECOES, FASES, FASE_LABEL, RODADAS,
-  ESPECIAIS_DEFS, JOGADORES, GOLEIROS,
+  ESPECIAIS_DEFS, ESPECIAIS_DEADLINE, JOGADORES, GOLEIROS,
 } from "../../shared/data.js";
 import { PONTOS, pontuarJogo, classePontuacao, norm } from "../../shared/scoring.js";
 
@@ -330,7 +330,7 @@ export default function App() {
   const isLocked = useCallback((j) => {
     if (gstate?.results?.[j.id]) return true;
     const k = new Date(j.kickoff);
-    return !isNaN(k) && Date.now() >= k.getTime();
+    return !isNaN(k) && Date.now() >= k.getTime() - 5 * 60 * 1000;
   }, [gstate]);
 
   async function handleAuth(mode, nome, email, senha) {
@@ -435,7 +435,7 @@ export default function App() {
         )}
         {tab === "especiais" && (
           <Especiais myPred={myPred} onSave={salvarEspeciais}
-            locked={gstate?.copaComecou ?? false}
+            locked={gstate?.espTravadas ?? false}
             oficiais={gstate?.especiaisOficiais ?? {}}
           />
         )}
@@ -566,8 +566,9 @@ function Especiais({ myPred, onSave, locked, oficiais }) {
   return (
     <div>
       <div className={"note" + (locked ? " warn" : "")}>
-        {locked ? <>🔒 Copa começou — apostas especiais <b>travadas</b>.</>
-          : <>Campeão, vice e 3º <b>fecham antes do apito da abertura</b>.</>}
+        {locked
+          ? <>🔒 Prazo encerrado — apostas especiais <b>travadas desde 11/06 às 16h</b>.</>
+          : <>⏰ <b>Prazo: 11/06/2026 às 16h (Brasília).</b> Depois disso, as apostas especiais travam automaticamente e não contam mais.</>}
       </div>
       <div className="esp-grid">
         {ESPECIAIS_DEFS.map((d) => {
@@ -715,8 +716,11 @@ function Regras() {
           </tbody>
         </table>
       </div>
+      <div className="section-h">Prazos — IMPORTANTE</div>
+      <div className="rule"><div className="stars">🕓</div><div><b>Apostas especiais — prazo fixo</b><p>Campeão, Artilheiro, Líder de assistências e Craque da Copa devem ser preenchidos <b>até 11/06/2026 às 16h (Brasília)</b>. Após esse horário as apostas travam automaticamente e não contam.</p></div></div>
+      <div className="rule"><div className="stars">⚽</div><div><b>Palpites de jogo — 5 minutos antes</b><p>Cada jogo fecha <b>5 minutos antes do apito inicial</b>. Tentou depois? Não passa. Sem exceções.</p></div></div>
       <div className="section-h">Apostas especiais</div>
-      <div className="note">{ESPECIAIS_DEFS.map((d) => `${d.label} (+${d.pts})`).join(", ")}. Fecham antes do apito da abertura. São bônus por visão — o grosso dos pontos vem do jogo a jogo.</div>
+      <div className="note">{ESPECIAIS_DEFS.map((d) => `${d.label} (+${d.pts})`).join(", ")}. São bônus por visão — o grosso dos pontos vem do jogo a jogo.</div>
     </div>
   );
 }

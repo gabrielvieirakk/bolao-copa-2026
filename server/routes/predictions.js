@@ -5,9 +5,11 @@ import {
   upsertSpecialBet, getSpecialBetsByUser,
   getMatch, getConfig, primeiroKickoffDaRodada,
 } from "../db.js";
+import { ESPECIAIS_DEADLINE } from "../../shared/data.js";
 
 const router = express.Router();
 const ABERTURA_DIAS = parseInt(process.env.ABERTURA_RODADA_DIAS || "5");
+const LOCK_ANTES_MS = 5 * 60 * 1000; // 5 min antes do kickoff
 
 // GET /api/predictions  — palpites do usuário logado
 router.get("/", auth, (req, res) => {
@@ -28,12 +30,13 @@ router.post("/placar", auth, (req, res) => {
   if (!jogo) return res.status(404).json({ erro: "Jogo não encontrado." });
 
   const agora = Date.now();
+  const kickoff = new Date(jogo.kickoff).getTime();
 
-  // (b) trava inviolável no kickoff
-  if (agora >= new Date(jogo.kickoff).getTime())
-    return res.status(409).json({ erro: "Jogo já começou — palpite travado." });
+  // Trava 5 minutos antes do apito
+  if (agora >= kickoff - LOCK_ANTES_MS)
+    return res.status(409).json({ erro: "Palpite travado — menos de 5 minutos para o apito." });
 
-  // (a) rodada precisa estar aberta (só grupos têm rodada numerada)
+  // Rodada precisa estar aberta (só grupos)
   if (jogo.fase === "grupos" && jogo.rodada) {
     const primeiroKick = primeiroKickoffDaRodada(jogo.fase, jogo.rodada);
     if (primeiroKick) {
@@ -49,8 +52,10 @@ router.post("/placar", auth, (req, res) => {
 
 // POST /api/predictions/especiais  — salvar apostas especiais
 router.post("/especiais", auth, (req, res) => {
+  const prazoPassou = Date.now() >= new Date(ESPECIAIS_DEADLINE).getTime();
   const copaComecou = getConfig("copaComecou") ?? false;
-  if (copaComecou) return res.status(409).json({ erro: "Copa já começou — apostas especiais travadas." });
+  if (prazoPassou || copaComecou)
+    return res.status(409).json({ erro: "Apostas especiais encerradas — prazo era 11/06 às 16h." });
 
   const { especiais } = req.body || {};
   if (!especiais || typeof especiais !== "object")

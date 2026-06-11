@@ -55,13 +55,14 @@ export const RODADAS = [
   { key: "final", label: "Final", fn: (j) => j.fase === "final" },
 ];
 
+// 11/06/2026 às 16:00 BRT = 19:00 UTC
+export const ESPECIAIS_DEADLINE = "2026-06-11T19:00:00.000Z";
+
 export const ESPECIAIS_DEFS = [
-  { key: "campeao", label: "Campeão", tipo: "selecao", pts: 25 },
-  { key: "vice", label: "Vice-campeão", tipo: "selecao", pts: 15 },
-  { key: "terceiro", label: "3º lugar", tipo: "selecao", pts: 10 },
-  { key: "artilheiro", label: "Artilheiro", tipo: "jogador", pts: 15 },
+  { key: "campeao",    label: "Campeão",              tipo: "selecao", pts: 25 },
+  { key: "artilheiro", label: "Artilheiro",            tipo: "jogador", pts: 15 },
   { key: "assistente", label: "Líder de assistências", tipo: "jogador", pts: 10 },
-  { key: "goleiro", label: "Goleiro menos vazado", tipo: "goleiro", pts: 10 },
+  { key: "craque",     label: "Craque da Copa",        tipo: "jogador", pts: 15 },
 ];
 
 export const JOGADORES = [
