@@ -1,6 +1,6 @@
 import express from "express";
 import { auth, adminOnly } from "../middleware.js";
-import { upsertMatch, upsertResult, clearResult, setConfig, getDb } from "../db.js";
+import { upsertMatch, upsertResult, clearResult, setConfig, getDb, getAllUsers } from "../db.js";
 
 const router = express.Router();
 
@@ -55,6 +55,18 @@ router.post("/especiais-oficiais", auth, adminOnly, (req, res) => {
   if (!especiais) return res.status(400).json({ erro: "especiais é obrigatório." });
   setConfig("especiaisOficiais", especiais);
   return res.json({ ok: true });
+});
+
+// GET /api/admin/users
+router.get("/users", auth, adminOnly, (req, res) => {
+  const users = getAllUsers().map((u) => ({
+    id: u.id,
+    nome: u.nome,
+    email: u.email,
+    isAdmin: !!u.is_admin,
+    criadoEm: u.created_at,
+  }));
+  return res.json(users);
 });
 
 export default router;

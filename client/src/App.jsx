@@ -735,7 +735,7 @@ function Admin({ gstate, onReload, showToast }) {
     <div>
       <div className="note">🛠 <b>Admin.</b> Insira os resultados manualmente após cada jogo. Aqui você também controla a Copa, cadastra mata-mata e define vencedores das especiais.</div>
       <div className="subtabs">
-        {[["resultados","Resultados"],["copa","Copa"],["mata","Mata-mata"],["oficiais","Especiais oficiais"]].map(([k,l]) => (
+        {[["resultados","Resultados"],["copa","Copa"],["mata","Mata-mata"],["oficiais","Especiais oficiais"],["usuarios","Usuários"]].map(([k,l]) => (
           <button key={k} className={"subtab"+(secao===k?" on":"")} onClick={() => setSecao(k)}>{l}</button>
         ))}
       </div>
@@ -757,6 +757,7 @@ function Admin({ gstate, onReload, showToast }) {
       {secao === "resultados" && <AdminResultados gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "mata" && <AdminMataMata gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "oficiais" && <AdminOficiais gstate={gstate} onReload={onReload} showToast={showToast} />}
+      {secao === "usuarios" && <AdminUsuarios />}
     </div>
   );
 }
@@ -870,6 +871,37 @@ function AdminMataMata({ gstate, onReload, showToast }) {
         <div className="card" key={k.id} style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div><span className="chip">{FASE_LABEL[k.fase]}</span>&nbsp; {flag(k.mandante)} {k.mandante} × {k.visitante} {flag(k.visitante)}</div>
           <button className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => remover(k.id)}>Remover</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AdminUsuarios() {
+  const [users, setUsers] = useState(null);
+
+  useEffect(() => {
+    api.get("/api/admin/users").then(setUsers).catch(() => setUsers([]));
+  }, []);
+
+  if (!users) return <div className="note">Carregando…</div>;
+
+  return (
+    <div>
+      <div className="note"><b>{users.length}</b> usuário(s) cadastrado(s).</div>
+      {users.map((u) => (
+        <div key={u.id} className="rank-row" style={{ gridTemplateColumns: "42px 1fr auto" }}>
+          <div className="rank-pos" style={{ fontSize: 14, color: "var(--muted)" }}>#{u.id}</div>
+          <div>
+            <div className="rank-name">
+              {u.nome}
+              {u.isAdmin && <span className="badge-admin">admin</span>}
+            </div>
+            <div className="rank-sub">{u.email}</div>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--muted)", textAlign: "right" }}>
+            {u.criadoEm ? new Date(u.criadoEm * 1000).toLocaleDateString("pt-BR") : "—"}
+          </div>
         </div>
       ))}
     </div>
