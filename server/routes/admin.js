@@ -1,7 +1,6 @@
 import express from "express";
 import { auth, adminOnly } from "../middleware.js";
 import { upsertMatch, upsertResult, clearResult, setConfig, getDb } from "../db.js";
-import { syncResults } from "../sync.js";
 
 const router = express.Router();
 
@@ -56,16 +55,6 @@ router.post("/especiais-oficiais", auth, adminOnly, (req, res) => {
   if (!especiais) return res.status(400).json({ erro: "especiais é obrigatório." });
   setConfig("especiaisOficiais", especiais);
   return res.json({ ok: true });
-});
-
-// POST /api/admin/sync
-router.post("/sync", auth, adminOnly, async (req, res) => {
-  try {
-    const atualizados = await syncResults();
-    return res.json({ atualizados });
-  } catch (e) {
-    return res.status(500).json({ erro: e.message });
-  }
 });
 
 export default router;

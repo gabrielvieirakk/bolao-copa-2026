@@ -430,7 +430,7 @@ export default function App() {
           <Jogos
             todosJogos={todosJogos} fase={fase} setFase={setFase}
             gstate={gstate} myPred={myPred} isLocked={isLocked}
-            onSave={salvarPlacar} onReloadState={reloadState}
+            onSave={salvarPlacar}
           />
         )}
         {tab === "especiais" && (
@@ -510,22 +510,7 @@ function Login({ onAuth }) {
 }
 
 /* ── Jogos ────────────────────────────────────────────────────────────── */
-function Jogos({ todosJogos, fase, setFase, gstate, myPred, isLocked, onSave, onReloadState }) {
-  const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState("");
-
-  async function doSync() {
-    setSyncing(true);
-    try {
-      const r = await api.post("/api/admin/sync", {});
-      setSyncMsg(`${r.atualizados} resultado(s) atualizado(s).`);
-      await onReloadState();
-    } catch (e) {
-      setSyncMsg("Erro: " + e.message);
-    }
-    setSyncing(false);
-  }
-
+function Jogos({ todosJogos, fase, setFase, gstate, myPred, isLocked, onSave }) {
   const abas = [...FASES, { key: "encerrados", label: "Encerrados" }];
   const lista = useMemo(() => {
     if (!gstate) return [];
@@ -538,22 +523,8 @@ function Jogos({ todosJogos, fase, setFase, gstate, myPred, isLocked, onSave, on
     return js.slice().sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
   }, [todosJogos, fase, gstate]);
 
-  const ultimaSync = gstate?.lastSync
-    ? new Date(gstate.lastSync).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
-    : "ainda não";
-
   return (
     <div>
-      <div className="sync-bar">
-        <div className="sync-info">
-          <span className={"sync-dot" + (syncing ? " pulse" : "")} />
-          <span>{syncing ? "Sincronizando…" : (syncMsg || `Última sync: ${ultimaSync}`)}</span>
-        </div>
-        <button className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 12.5 }} disabled={syncing} onClick={doSync}>
-          {syncing ? "..." : "↻ Sincronizar"}
-        </button>
-      </div>
-
       <div className="subtabs">
         {abas.map((f) => (
           <button key={f.key} className={"subtab"+(fase===f.key?" on":"")} onClick={() => setFase(f.key)}>{f.label}</button>
@@ -753,7 +724,6 @@ function Regras() {
 /* ── Admin ────────────────────────────────────────────────────────────── */
 function Admin({ gstate, onReload, showToast }) {
   const [secao, setSecao] = useState("resultados");
-  const [syncing, setSyncing] = useState(false);
 
   async function toggleCopa() {
     await api.post("/api/admin/copa", { copaComecou: !gstate?.copaComecou });
@@ -761,21 +731,9 @@ function Admin({ gstate, onReload, showToast }) {
     showToast(gstate?.copaComecou ? "Especiais reabertas" : "Especiais travadas");
   }
 
-  async function doSync() {
-    setSyncing(true);
-    try {
-      const r = await api.post("/api/admin/sync", {});
-      showToast(`${r.atualizados} resultado(s) atualizado(s)`);
-      await onReload();
-    } catch (e) {
-      showToast("Erro: " + e.message);
-    }
-    setSyncing(false);
-  }
-
   return (
     <div>
-      <div className="note">🛠 <b>Admin.</b> Resultados entram sozinhos (cron às 8h). Aqui você corrige, controla a Copa, cadastra mata-mata e define vencedores das especiais.</div>
+      <div className="note">🛠 <b>Admin.</b> Insira os resultados manualmente após cada jogo. Aqui você também controla a Copa, cadastra mata-mata e define vencedores das especiais.</div>
       <div className="subtabs">
         {[["resultados","Resultados"],["copa","Copa"],["mata","Mata-mata"],["oficiais","Especiais oficiais"]].map(([k,l]) => (
           <button key={k} className={"subtab"+(secao===k?" on":"")} onClick={() => setSecao(k)}>{l}</button>
@@ -796,14 +754,14 @@ function Admin({ gstate, onReload, showToast }) {
         </div>
       )}
 
-      {secao === "resultados" && <AdminResultados gstate={gstate} onReload={onReload} showToast={showToast} doSync={doSync} syncing={syncing} />}
+      {secao === "resultados" && <AdminResultados gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "mata" && <AdminMataMata gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "oficiais" && <AdminOficiais gstate={gstate} onReload={onReload} showToast={showToast} />}
     </div>
   );
 }
 
-function AdminResultados({ gstate, onReload, showToast, doSync, syncing }) {
+function AdminResultados({ gstate, onReload, showToast }) {
   const [faseSel, setFaseSel] = useState("grupos");
   const lista = (gstate?.matches || []).filter((j) => j.fase === faseSel).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
 
@@ -821,15 +779,6 @@ function AdminResultados({ gstate, onReload, showToast, doSync, syncing }) {
 
   return (
     <div>
-      <div className="sync-bar" style={{ marginTop: 4 }}>
-        <div className="sync-info">
-          <span className={"sync-dot"+(syncing?" pulse":"")} />
-          <span>{syncing ? "Buscando placares…" : "Sync automático (90 min regulamentares)."}</span>
-        </div>
-        <button className="btn btn-primary" style={{ padding: "7px 14px", fontSize: 12.5 }} disabled={syncing} onClick={doSync}>
-          {syncing ? "..." : "Buscar agora"}
-        </button>
-      </div>
       <div className="subtabs">
         {FASES.map((f) => (
           <button key={f.key} className={"subtab"+(faseSel===f.key?" on":"")} onClick={() => setFaseSel(f.key)}>{f.label}</button>

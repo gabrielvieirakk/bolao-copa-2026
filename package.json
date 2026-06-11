@@ -13,13 +13,11 @@
     "start": "node --experimental-sqlite server/index.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.52.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "node-cron": "^3.0.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
