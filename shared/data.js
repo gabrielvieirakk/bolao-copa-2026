@@ -128,28 +128,90 @@ export const GOLEIROS = [
   { n: "Lawrence Ati-Zigi", s: "Gana" }, { n: "Hernán Galíndez", s: "Equador" }, { n: "Angus Gunn", s: "Escócia" },
 ];
 
-export function gerarJogosGrupos() {
-  const pares = [[0, 3], [1, 2], [0, 2], [3, 1], [0, 1], [2, 3]];
-  const jogos = [];
-  Object.entries(GRUPOS).forEach(([L, times], gi) => {
-    pares.forEach(([a, b], i) => {
-      const round = Math.floor(i / 2);
-      const baseDay = [12, 18, 24][round];
-      const day = Math.min(baseDay + (gi % 4), 27);
-      const hour = [13, 16, 19, 22][i % 4];
-      const kickoff = `2026-06-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:00:00`;
-      jogos.push({
-        id: `g-${L}-${i}`,
-        fase: "grupos",
-        grupo: L,
-        rodada: round + 1,
-        mandante: times[a],
-        visitante: times[b],
-        kickoff,
-      });
-    });
-  });
-  return jogos;
-}
-
-export const JOGOS_GRUPOS = gerarJogosGrupos();
+// Calendário oficial FIFA Copa do Mundo 2026 — horários em UTC (EDT = UTC-4)
+export const JOGOS_GRUPOS = [
+  // GRUPO A
+  { id:"g-A-0", fase:"grupos", grupo:"A", rodada:1, mandante:"México",            visitante:"África do Sul",       kickoff:"2026-06-11T19:00:00Z" },
+  { id:"g-A-1", fase:"grupos", grupo:"A", rodada:1, mandante:"Coreia do Sul",      visitante:"República Tcheca",    kickoff:"2026-06-12T02:00:00Z" },
+  { id:"g-A-2", fase:"grupos", grupo:"A", rodada:2, mandante:"República Tcheca",   visitante:"África do Sul",       kickoff:"2026-06-18T16:00:00Z" },
+  { id:"g-A-3", fase:"grupos", grupo:"A", rodada:2, mandante:"México",             visitante:"Coreia do Sul",       kickoff:"2026-06-19T01:00:00Z" },
+  { id:"g-A-4", fase:"grupos", grupo:"A", rodada:3, mandante:"República Tcheca",   visitante:"México",              kickoff:"2026-06-25T01:00:00Z" },
+  { id:"g-A-5", fase:"grupos", grupo:"A", rodada:3, mandante:"África do Sul",      visitante:"Coreia do Sul",       kickoff:"2026-06-25T01:00:00Z" },
+  // GRUPO B
+  { id:"g-B-0", fase:"grupos", grupo:"B", rodada:1, mandante:"Canadá",             visitante:"Bósnia e Herzegovina",kickoff:"2026-06-12T19:00:00Z" },
+  { id:"g-B-1", fase:"grupos", grupo:"B", rodada:1, mandante:"Catar",              visitante:"Suíça",               kickoff:"2026-06-13T19:00:00Z" },
+  { id:"g-B-2", fase:"grupos", grupo:"B", rodada:2, mandante:"Suíça",              visitante:"Bósnia e Herzegovina",kickoff:"2026-06-18T19:00:00Z" },
+  { id:"g-B-3", fase:"grupos", grupo:"B", rodada:2, mandante:"Canadá",             visitante:"Catar",               kickoff:"2026-06-18T22:00:00Z" },
+  { id:"g-B-4", fase:"grupos", grupo:"B", rodada:3, mandante:"Suíça",              visitante:"Canadá",              kickoff:"2026-06-24T19:00:00Z" },
+  { id:"g-B-5", fase:"grupos", grupo:"B", rodada:3, mandante:"Bósnia e Herzegovina",visitante:"Catar",             kickoff:"2026-06-24T19:00:00Z" },
+  // GRUPO C
+  { id:"g-C-0", fase:"grupos", grupo:"C", rodada:1, mandante:"Brasil",             visitante:"Marrocos",            kickoff:"2026-06-13T22:00:00Z" },
+  { id:"g-C-1", fase:"grupos", grupo:"C", rodada:1, mandante:"Haiti",              visitante:"Escócia",             kickoff:"2026-06-14T01:00:00Z" },
+  { id:"g-C-2", fase:"grupos", grupo:"C", rodada:2, mandante:"Escócia",            visitante:"Marrocos",            kickoff:"2026-06-19T22:00:00Z" },
+  { id:"g-C-3", fase:"grupos", grupo:"C", rodada:2, mandante:"Brasil",             visitante:"Haiti",               kickoff:"2026-06-20T00:30:00Z" },
+  { id:"g-C-4", fase:"grupos", grupo:"C", rodada:3, mandante:"Escócia",            visitante:"Brasil",              kickoff:"2026-06-24T22:00:00Z" },
+  { id:"g-C-5", fase:"grupos", grupo:"C", rodada:3, mandante:"Marrocos",           visitante:"Haiti",               kickoff:"2026-06-24T22:00:00Z" },
+  // GRUPO D
+  { id:"g-D-0", fase:"grupos", grupo:"D", rodada:1, mandante:"Estados Unidos",     visitante:"Paraguai",            kickoff:"2026-06-13T01:00:00Z" },
+  { id:"g-D-1", fase:"grupos", grupo:"D", rodada:1, mandante:"Austrália",          visitante:"Turquia",             kickoff:"2026-06-14T01:00:00Z" },
+  { id:"g-D-2", fase:"grupos", grupo:"D", rodada:2, mandante:"Estados Unidos",     visitante:"Austrália",           kickoff:"2026-06-19T19:00:00Z" },
+  { id:"g-D-3", fase:"grupos", grupo:"D", rodada:2, mandante:"Turquia",            visitante:"Paraguai",            kickoff:"2026-06-20T03:00:00Z" },
+  { id:"g-D-4", fase:"grupos", grupo:"D", rodada:3, mandante:"Turquia",            visitante:"Estados Unidos",      kickoff:"2026-06-26T02:00:00Z" },
+  { id:"g-D-5", fase:"grupos", grupo:"D", rodada:3, mandante:"Paraguai",           visitante:"Austrália",           kickoff:"2026-06-26T02:00:00Z" },
+  // GRUPO E
+  { id:"g-E-0", fase:"grupos", grupo:"E", rodada:1, mandante:"Alemanha",           visitante:"Curaçao",             kickoff:"2026-06-14T17:00:00Z" },
+  { id:"g-E-1", fase:"grupos", grupo:"E", rodada:1, mandante:"Costa do Marfim",    visitante:"Equador",             kickoff:"2026-06-14T23:00:00Z" },
+  { id:"g-E-2", fase:"grupos", grupo:"E", rodada:2, mandante:"Alemanha",           visitante:"Costa do Marfim",     kickoff:"2026-06-20T20:00:00Z" },
+  { id:"g-E-3", fase:"grupos", grupo:"E", rodada:2, mandante:"Equador",            visitante:"Curaçao",             kickoff:"2026-06-21T00:00:00Z" },
+  { id:"g-E-4", fase:"grupos", grupo:"E", rodada:3, mandante:"Equador",            visitante:"Alemanha",            kickoff:"2026-06-25T20:00:00Z" },
+  { id:"g-E-5", fase:"grupos", grupo:"E", rodada:3, mandante:"Curaçao",            visitante:"Costa do Marfim",     kickoff:"2026-06-25T20:00:00Z" },
+  // GRUPO F
+  { id:"g-F-0", fase:"grupos", grupo:"F", rodada:1, mandante:"Holanda",            visitante:"Japão",               kickoff:"2026-06-14T20:00:00Z" },
+  { id:"g-F-1", fase:"grupos", grupo:"F", rodada:1, mandante:"Suécia",             visitante:"Tunísia",             kickoff:"2026-06-15T02:00:00Z" },
+  { id:"g-F-2", fase:"grupos", grupo:"F", rodada:2, mandante:"Holanda",            visitante:"Suécia",              kickoff:"2026-06-20T17:00:00Z" },
+  { id:"g-F-3", fase:"grupos", grupo:"F", rodada:2, mandante:"Tunísia",            visitante:"Japão",               kickoff:"2026-06-21T04:00:00Z" },
+  { id:"g-F-4", fase:"grupos", grupo:"F", rodada:3, mandante:"Japão",              visitante:"Suécia",              kickoff:"2026-06-25T23:00:00Z" },
+  { id:"g-F-5", fase:"grupos", grupo:"F", rodada:3, mandante:"Tunísia",            visitante:"Holanda",             kickoff:"2026-06-25T23:00:00Z" },
+  // GRUPO G
+  { id:"g-G-0", fase:"grupos", grupo:"G", rodada:1, mandante:"Bélgica",            visitante:"Egito",               kickoff:"2026-06-15T19:00:00Z" },
+  { id:"g-G-1", fase:"grupos", grupo:"G", rodada:1, mandante:"Irã",                visitante:"Nova Zelândia",       kickoff:"2026-06-16T01:00:00Z" },
+  { id:"g-G-2", fase:"grupos", grupo:"G", rodada:2, mandante:"Bélgica",            visitante:"Irã",                 kickoff:"2026-06-21T19:00:00Z" },
+  { id:"g-G-3", fase:"grupos", grupo:"G", rodada:2, mandante:"Nova Zelândia",      visitante:"Egito",               kickoff:"2026-06-22T01:00:00Z" },
+  { id:"g-G-4", fase:"grupos", grupo:"G", rodada:3, mandante:"Egito",              visitante:"Irã",                 kickoff:"2026-06-27T03:00:00Z" },
+  { id:"g-G-5", fase:"grupos", grupo:"G", rodada:3, mandante:"Nova Zelândia",      visitante:"Bélgica",             kickoff:"2026-06-27T03:00:00Z" },
+  // GRUPO H
+  { id:"g-H-0", fase:"grupos", grupo:"H", rodada:1, mandante:"Espanha",            visitante:"Cabo Verde",          kickoff:"2026-06-15T16:00:00Z" },
+  { id:"g-H-1", fase:"grupos", grupo:"H", rodada:1, mandante:"Arábia Saudita",     visitante:"Uruguai",             kickoff:"2026-06-15T22:00:00Z" },
+  { id:"g-H-2", fase:"grupos", grupo:"H", rodada:2, mandante:"Espanha",            visitante:"Arábia Saudita",      kickoff:"2026-06-21T16:00:00Z" },
+  { id:"g-H-3", fase:"grupos", grupo:"H", rodada:2, mandante:"Uruguai",            visitante:"Cabo Verde",          kickoff:"2026-06-21T22:00:00Z" },
+  { id:"g-H-4", fase:"grupos", grupo:"H", rodada:3, mandante:"Cabo Verde",         visitante:"Arábia Saudita",      kickoff:"2026-06-27T00:00:00Z" },
+  { id:"g-H-5", fase:"grupos", grupo:"H", rodada:3, mandante:"Uruguai",            visitante:"Espanha",             kickoff:"2026-06-27T00:00:00Z" },
+  // GRUPO I
+  { id:"g-I-0", fase:"grupos", grupo:"I", rodada:1, mandante:"França",             visitante:"Senegal",             kickoff:"2026-06-16T19:00:00Z" },
+  { id:"g-I-1", fase:"grupos", grupo:"I", rodada:1, mandante:"Iraque",             visitante:"Noruega",             kickoff:"2026-06-16T22:00:00Z" },
+  { id:"g-I-2", fase:"grupos", grupo:"I", rodada:2, mandante:"França",             visitante:"Iraque",              kickoff:"2026-06-22T21:00:00Z" },
+  { id:"g-I-3", fase:"grupos", grupo:"I", rodada:2, mandante:"Noruega",            visitante:"Senegal",             kickoff:"2026-06-23T00:00:00Z" },
+  { id:"g-I-4", fase:"grupos", grupo:"I", rodada:3, mandante:"Noruega",            visitante:"França",              kickoff:"2026-06-26T19:00:00Z" },
+  { id:"g-I-5", fase:"grupos", grupo:"I", rodada:3, mandante:"Senegal",            visitante:"Iraque",              kickoff:"2026-06-26T19:00:00Z" },
+  // GRUPO J
+  { id:"g-J-0", fase:"grupos", grupo:"J", rodada:1, mandante:"Argentina",          visitante:"Argélia",             kickoff:"2026-06-17T01:00:00Z" },
+  { id:"g-J-1", fase:"grupos", grupo:"J", rodada:1, mandante:"Áustria",            visitante:"Jordânia",            kickoff:"2026-06-17T04:00:00Z" },
+  { id:"g-J-2", fase:"grupos", grupo:"J", rodada:2, mandante:"Argentina",          visitante:"Áustria",             kickoff:"2026-06-22T17:00:00Z" },
+  { id:"g-J-3", fase:"grupos", grupo:"J", rodada:2, mandante:"Jordânia",           visitante:"Argélia",             kickoff:"2026-06-23T03:00:00Z" },
+  { id:"g-J-4", fase:"grupos", grupo:"J", rodada:3, mandante:"Argélia",            visitante:"Áustria",             kickoff:"2026-06-28T02:00:00Z" },
+  { id:"g-J-5", fase:"grupos", grupo:"J", rodada:3, mandante:"Jordânia",           visitante:"Argentina",           kickoff:"2026-06-28T02:00:00Z" },
+  // GRUPO K
+  { id:"g-K-0", fase:"grupos", grupo:"K", rodada:1, mandante:"Portugal",           visitante:"RD Congo",            kickoff:"2026-06-17T17:00:00Z" },
+  { id:"g-K-1", fase:"grupos", grupo:"K", rodada:1, mandante:"Uzbequistão",        visitante:"Colômbia",            kickoff:"2026-06-18T02:00:00Z" },
+  { id:"g-K-2", fase:"grupos", grupo:"K", rodada:2, mandante:"Portugal",           visitante:"Uzbequistão",         kickoff:"2026-06-23T17:00:00Z" },
+  { id:"g-K-3", fase:"grupos", grupo:"K", rodada:2, mandante:"Colômbia",           visitante:"RD Congo",            kickoff:"2026-06-24T02:00:00Z" },
+  { id:"g-K-4", fase:"grupos", grupo:"K", rodada:3, mandante:"Colômbia",           visitante:"Portugal",            kickoff:"2026-06-27T23:30:00Z" },
+  { id:"g-K-5", fase:"grupos", grupo:"K", rodada:3, mandante:"RD Congo",           visitante:"Uzbequistão",         kickoff:"2026-06-27T23:30:00Z" },
+  // GRUPO L
+  { id:"g-L-0", fase:"grupos", grupo:"L", rodada:1, mandante:"Inglaterra",         visitante:"Croácia",             kickoff:"2026-06-17T20:00:00Z" },
+  { id:"g-L-1", fase:"grupos", grupo:"L", rodada:1, mandante:"Gana",               visitante:"Panamá",              kickoff:"2026-06-17T23:00:00Z" },
+  { id:"g-L-2", fase:"grupos", grupo:"L", rodada:2, mandante:"Inglaterra",         visitante:"Gana",                kickoff:"2026-06-23T20:00:00Z" },
+  { id:"g-L-3", fase:"grupos", grupo:"L", rodada:2, mandante:"Panamá",             visitante:"Croácia",             kickoff:"2026-06-23T23:00:00Z" },
+  { id:"g-L-4", fase:"grupos", grupo:"L", rodada:3, mandante:"Panamá",             visitante:"Inglaterra",          kickoff:"2026-06-27T21:00:00Z" },
+  { id:"g-L-5", fase:"grupos", grupo:"L", rodada:3, mandante:"Croácia",            visitante:"Gana",                kickoff:"2026-06-27T21:00:00Z" },
+];
