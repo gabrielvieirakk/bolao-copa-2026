@@ -898,7 +898,7 @@ function Admin({ gstate, onReload, showToast }) {
     <div>
       <div className="note">🛠 <b>Admin.</b> Insira os resultados manualmente após cada jogo. Aqui você também controla a Copa, cadastra mata-mata e define vencedores das especiais.</div>
       <div className="subtabs">
-        {[["resultados","Resultados"],["copa","Copa"],["mata","Mata-mata"],["oficiais","Especiais oficiais"],["palpites","Palpites"],["usuarios","Usuários"]].map(([k,l]) => (
+        {[["resultados","Resultados"],["copa","Copa"],["mata","Mata-mata"],["oficiais","Especiais oficiais"],["corrigir-esp","Corrigir especiais"],["palpites","Palpites"],["usuarios","Usuários"]].map(([k,l]) => (
           <button key={k} className={"subtab"+(secao===k?" on":"")} onClick={() => setSecao(k)}>{l}</button>
         ))}
       </div>
@@ -920,6 +920,7 @@ function Admin({ gstate, onReload, showToast }) {
       {secao === "resultados" && <AdminResultados gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "mata" && <AdminMataMata gstate={gstate} onReload={onReload} showToast={showToast} />}
       {secao === "oficiais" && <AdminOficiais gstate={gstate} onReload={onReload} showToast={showToast} />}
+      {secao === "corrigir-esp" && <AdminEspeciaisUsuario showToast={showToast} />}
       {secao === "palpites" && <AdminPalpites />}
       {secao === "usuarios" && <AdminUsuarios />}
     </div>
@@ -1242,6 +1243,70 @@ function AdminUsuarios() {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function AdminEspeciaisUsuario({ showToast }) {
+  const [users, setUsers] = useState(null);
+  const [userId, setUserId] = useState("");
+  const [esp, setEsp] = useState({});
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    api.get("/api/admin/users").then(setUsers).catch(() => setUsers([]));
+  }, []);
+
+  const set = (k, v) => setEsp((p) => ({ ...p, [k]: v }));
+
+  async function salvar() {
+    if (!userId) { showToast("Escolha um usuário"); return; }
+    setBusy(true);
+    try {
+      await api.post("/api/admin/especiais-usuario", { userId: parseInt(userId), especiais: esp });
+      showToast("Apostas especiais salvas ✓");
+      setEsp({});
+      setUserId("");
+    } catch (e) {
+      showToast("Erro: " + e.message);
+    }
+    setBusy(false);
+  }
+
+  if (!users) return <div className="note">Carregando usuários…</div>;
+
+  return (
+    <div>
+      <div className="note warn">
+        ⚠️ Use apenas para corrigir apostas perdidas por problema técnico. Isso sobrescreve sem checar prazo.
+      </div>
+      <div style={{ marginBottom: 14 }}>
+        <label className="lbl">Usuário</label>
+        <select className="inp" value={userId} onChange={(e) => setUserId(e.target.value)}>
+          <option value="">— escolha —</option>
+          {users.map((u) => <option key={u.id} value={u.id}>{u.nome} ({u.email})</option>)}
+        </select>
+      </div>
+      <div className="esp-grid">
+        {ESPECIAIS_DEFS.map((d) => (
+          <div className="esp-card" key={d.key}>
+            <div className="head"><h4>{d.label}</h4><span className="esp-pts">+{d.pts} pts</span></div>
+            {d.tipo === "selecao" ? (
+              <select className="inp" value={esp[d.key] || ""} onChange={(e) => set(d.key, e.target.value)}>
+                <option value="">— escolha —</option>
+                {TODAS_SELECOES.map((s) => <option key={s} value={s}>{flag(s)} {s}</option>)}
+              </select>
+            ) : (
+              <SelectJogador tipo={d.tipo} value={esp[d.key] || ""} onChange={(v) => set(d.key, v)} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign: "right", marginTop: 16 }}>
+        <button className="btn btn-gold" disabled={busy || !userId} onClick={salvar}>
+          Salvar apostas deste usuário
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import express from "express";
 import { auth, adminOnly } from "../middleware.js";
-import { upsertMatch, upsertResult, clearResult, setConfig, getDb, getAllUsers, deleteUser, updateUser } from "../db.js";
+import { upsertMatch, upsertResult, clearResult, setConfig, getDb, getAllUsers, deleteUser, updateUser, upsertSpecialBet } from "../db.js";
 
 const router = express.Router();
 
@@ -114,6 +114,16 @@ router.get("/especiais-palpites", auth, adminOnly, (req, res) => {
     ORDER BY u.nome, sb.chave
   `).all();
   return res.json(rows);
+});
+
+// POST /api/admin/especiais-usuario — admin salva apostas especiais de qualquer usuário, sem prazo
+router.post("/especiais-usuario", auth, adminOnly, (req, res) => {
+  const { userId, especiais } = req.body || {};
+  if (!userId || !especiais) return res.status(400).json({ erro: "userId e especiais são obrigatórios." });
+  for (const [chave, valor] of Object.entries(especiais)) {
+    if (valor) upsertSpecialBet(parseInt(userId), chave, String(valor));
+  }
+  return res.json({ ok: true });
 });
 
 export default router;
