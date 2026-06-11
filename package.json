@@ -13,17 +13,17 @@
     "start": "node --experimental-sqlite server/index.js"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "vite": "^6.3.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.5.2",
-    "concurrently": "^9.1.2",
-    "vite": "^6.3.5"
+    "concurrently": "^9.1.2"
   }
 }
