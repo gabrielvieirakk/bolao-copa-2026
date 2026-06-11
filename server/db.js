@@ -81,6 +81,18 @@ export function createUser(email, nome, senhaHash) {
 export function getAllUsers() {
   return getDb().prepare("SELECT id, email, nome, is_admin, created_at FROM users").all();
 }
+export function deleteUser(id) {
+  const db = getDb();
+  db.prepare("DELETE FROM predictions WHERE user_id = ?").run(id);
+  db.prepare("DELETE FROM special_bets WHERE user_id = ?").run(id);
+  db.prepare("DELETE FROM users WHERE id = ?").run(id);
+}
+export function updateUser(id, { nome, email, isAdmin }) {
+  const db = getDb();
+  if (nome !== undefined) db.prepare("UPDATE users SET nome = ? WHERE id = ?").run(nome, id);
+  if (email !== undefined) db.prepare("UPDATE users SET email = ? WHERE id = ?").run(email.toLowerCase(), id);
+  if (isAdmin !== undefined) db.prepare("UPDATE users SET is_admin = ? WHERE id = ?").run(isAdmin ? 1 : 0, id);
+}
 
 // ── matches ────────────────────────────────────────────────────────────────
 export function upsertMatch(m) {

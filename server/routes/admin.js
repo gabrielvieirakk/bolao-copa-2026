@@ -1,6 +1,6 @@
 import express from "express";
 import { auth, adminOnly } from "../middleware.js";
-import { upsertMatch, upsertResult, clearResult, setConfig, getDb, getAllUsers } from "../db.js";
+import { upsertMatch, upsertResult, clearResult, setConfig, getDb, getAllUsers, deleteUser, updateUser } from "../db.js";
 
 const router = express.Router();
 
@@ -67,6 +67,23 @@ router.get("/users", auth, adminOnly, (req, res) => {
     criadoEm: u.created_at,
   }));
   return res.json(users);
+});
+
+// DELETE /api/admin/users/:id
+router.delete("/users/:id", auth, adminOnly, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (id === req.user.id)
+    return res.status(400).json({ erro: "Você não pode excluir sua própria conta." });
+  deleteUser(id);
+  return res.json({ ok: true });
+});
+
+// PUT /api/admin/users/:id
+router.put("/users/:id", auth, adminOnly, (req, res) => {
+  const id = parseInt(req.params.id);
+  const { nome, email, isAdmin } = req.body || {};
+  updateUser(id, { nome, email, isAdmin });
+  return res.json({ ok: true });
 });
 
 export default router;

@@ -883,29 +883,93 @@ function AdminMataMata({ gstate, onReload, showToast }) {
 
 function AdminUsuarios() {
   const [users, setUsers] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [editNome, setEditNome] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    api.get("/api/admin/users").then(setUsers).catch(() => setUsers([]));
-  }, []);
+  async function load() {
+    const u = await api.get("/api/admin/users").catch(() => []);
+    setUsers(u);
+  }
+  useEffect(() => { load(); }, []);
+
+  async function handleDelete(u) {
+    if (!window.confirm(`Excluir ${u.nome} (${u.email})? Os palpites dele também serão removidos.`)) return;
+    setBusy(true);
+    await api.delete(`/api/admin/users/${u.id}`).catch((e) => alert(e.message));
+    await load();
+    setBusy(false);
+  }
+
+  async function handleToggleAdmin(u) {
+    if (!window.confirm(`${u.isAdmin ? "Remover admin de" : "Tornar admin"} ${u.nome}?`)) return;
+    setBusy(true);
+    await api.put(`/api/admin/users/${u.id}`, { isAdmin: !u.isAdmin }).catch((e) => alert(e.message));
+    await load();
+    setBusy(false);
+  }
+
+  function startEdit(u) {
+    setEditId(u.id);
+    setEditNome(u.nome);
+    setEditEmail(u.email);
+  }
+
+  async function handleSaveEdit(u) {
+    if (!editNome.trim() || !editEmail.trim()) { alert("Nome e e-mail não podem ser vazios."); return; }
+    setBusy(true);
+    await api.put(`/api/admin/users/${u.id}`, { nome: editNome.trim(), email: editEmail.trim() }).catch((e) => alert(e.message));
+    setEditId(null);
+    await load();
+    setBusy(false);
+  }
 
   if (!users) return <div className="note">Carregando…</div>;
 
   return (
     <div>
-      <div className="note"><b>{users.length}</b> usuário(s) cadastrado(s).</div>
+      <div className="note"><b>{users.length}</b> usuário(s) cadastrado(s). <button className="btn btn-ghost" style={{ padding: "4px 10px", fontSize: 12 }} onClick={load}>↻ atualizar</button></div>
       {users.map((u) => (
-        <div key={u.id} className="rank-row" style={{ gridTemplateColumns: "42px 1fr auto" }}>
-          <div className="rank-pos" style={{ fontSize: 14, color: "var(--muted)" }}>#{u.id}</div>
-          <div>
-            <div className="rank-name">
-              {u.nome}
-              {u.isAdmin && <span className="badge-admin">admin</span>}
+        <div key={u.id} className="card" style={{ padding: "12px 14px", marginBottom: 10 }}>
+          {editId === u.id ? (
+            <div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div>
+                  <label className="lbl">Nome</label>
+                  <input className="inp" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+                </div>
+                <div>
+                  <label className="lbl">E-mail</label>
+                  <input className="inp" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <button className="btn btn-ghost" style={{ padding: "6px 12px" }} onClick={() => setEditId(null)}>Cancelar</button>
+                <button className="btn btn-primary" disabled={busy} onClick={() => handleSaveEdit(u)}>Salvar</button>
+              </div>
             </div>
-            <div className="rank-sub">{u.email}</div>
-          </div>
-          <div style={{ fontSize: 11, color: "var(--muted)", textAlign: "right" }}>
-            {u.criadoEm ? new Date(u.criadoEm * 1000).toLocaleDateString("pt-BR") : "—"}
-          </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 14, color: "var(--muted)", minWidth: 32 }}>#{u.id}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+                  {u.nome}
+                  {u.isAdmin && <span className="badge-admin">admin</span>}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
+                  {u.email} · {u.criadoEm ? new Date(u.criadoEm * 1000).toLocaleDateString("pt-BR") : "—"}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }} disabled={busy} onClick={() => startEdit(u)} title="Editar">✏️</button>
+                <button className="btn btn-ghost" style={{ padding: "5px 10px", fontSize: 12 }} disabled={busy} onClick={() => handleToggleAdmin(u)} title={u.isAdmin ? "Remover admin" : "Tornar admin"}>
+                  {u.isAdmin ? "👑 remover" : "👑 admin"}
+                </button>
+                <button className="btn" style={{ padding: "5px 10px", fontSize: 12, background: "rgba(229,72,77,.15)", borderColor: "var(--danger)", color: "var(--danger)" }} disabled={busy} onClick={() => handleDelete(u)} title="Excluir">🗑</button>
+              </div>
+            </div>
+          )}
         </div>
       ))}
     </div>
