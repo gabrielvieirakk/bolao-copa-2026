@@ -86,4 +86,34 @@ router.put("/users/:id", auth, adminOnly, (req, res) => {
   return res.json({ ok: true });
 });
 
+// GET /api/admin/palpites — todos os palpites com nome do usuário e info do jogo
+router.get("/palpites", auth, adminOnly, (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT
+      p.match_id, p.gols_m, p.gols_v, p.updated_at,
+      u.id AS user_id, u.nome AS user_nome,
+      m.mandante, m.visitante, m.kickoff, m.fase, m.grupo, m.rodada,
+      r.gols_m AS res_m, r.gols_v AS res_v
+    FROM predictions p
+    JOIN users u ON u.id = p.user_id
+    JOIN matches m ON m.id = p.match_id
+    LEFT JOIN results r ON r.match_id = p.match_id
+    ORDER BY m.kickoff, u.nome
+  `).all();
+  return res.json(rows);
+});
+
+// GET /api/admin/especiais-palpites — todos os especiais com nome do usuário
+router.get("/especiais-palpites", auth, adminOnly, (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT sb.user_id, sb.chave, sb.valor, u.nome AS user_nome
+    FROM special_bets sb
+    JOIN users u ON u.id = sb.user_id
+    ORDER BY u.nome, sb.chave
+  `).all();
+  return res.json(rows);
+});
+
 export default router;
