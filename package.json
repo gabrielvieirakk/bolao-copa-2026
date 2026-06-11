@@ -10,7 +10,7 @@
     "server:dev": "node --watch server/index.js",
     "client:dev": "vite client",
     "build": "vite build",
-    "start": "node server/index.js"
+    "start": "node --experimental-sqlite server/index.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
