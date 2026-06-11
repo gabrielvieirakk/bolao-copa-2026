@@ -215,6 +215,7 @@ function MatchCard({ jogo, resultado, palpite, onSave, locked }) {
   const [m, setM] = useState(palpite?.m ?? 0);
   const [v, setV] = useState(palpite?.v ?? 0);
   const [dirty, setDirty] = useState(false);
+  const [erroSave, setErroSave] = useState("");
 
   useEffect(() => {
     setM(palpite?.m ?? 0);
@@ -283,10 +284,20 @@ function MatchCard({ jogo, resultado, palpite, onSave, locked }) {
         </div>
       )}
 
+      {erroSave && (
+        <div style={{ marginTop: 8, fontSize: 12.5, color: "var(--danger)", textAlign: "center", fontWeight: 600 }}>
+          ⚠️ {erroSave}
+        </div>
+      )}
       {!locked && !resultado && (
         <div className="confirm-row">
           {dirty && <span style={{ fontSize: 12, color: "var(--muted)" }}>não salvo</span>}
-          <button className="btn btn-primary" onClick={() => { onSave({ m, v }); setDirty(false); }}>
+          <button className="btn btn-primary" onClick={async () => {
+            setErroSave("");
+            const r = await onSave({ m, v });
+            if (r?.erro) setErroSave(r.erro);
+            else setDirty(false);
+          }}>
             {temPalpite ? "Atualizar palpite" : "Confirmar palpite"}
           </button>
         </div>
@@ -307,7 +318,7 @@ export default function App() {
 
   const showToast = useCallback((msg) => {
     setToast(msg);
-    setTimeout(() => setToast(""), 1800);
+    setTimeout(() => setToast(""), 3500);
   }, []);
 
   // Carrega estado global
@@ -361,8 +372,10 @@ export default function App() {
       await api.post("/api/predictions/placar", { matchId: jogoId, m: placar.m, v: placar.v });
       setMyPred((p) => ({ ...p, placares: { ...p.placares, [jogoId]: placar } }));
       showToast("Palpite salvo ✓");
+      return { ok: true };
     } catch (e) {
       showToast("Erro: " + e.message);
+      return { erro: e.message };
     }
   }
 
@@ -420,7 +433,7 @@ export default function App() {
 
       <div className="wrap">
         <div className="tabs">
-          {[["jogos","Jogos"],["especiais","Apostas Especiais"],["ranking","Classificação"],["regras","Regras"]].map(([k,l]) => (
+          {[["jogos","Jogos"],["especiais","Apostas Especiais"],["palpites-todos","Palpites"],["ranking","Classificação"],["regras","Regras"]].map(([k,l]) => (
             <button key={k} className={"tab"+(tab===k?" on":"")} onClick={() => setTab(k)}>{l}</button>
           ))}
           {ehAdmin && <button className={"tab"+(tab==="admin"?" on":"")} onClick={() => setTab("admin")}>Admin</button>}
@@ -439,6 +452,7 @@ export default function App() {
             oficiais={gstate?.especiaisOficiais ?? {}}
           />
         )}
+        {tab === "palpites-todos" && <TodosPalpites myNome={session.nome} gstate={gstate} />}
         {tab === "ranking" && <Ranking myId={session.nome} />}
         {tab === "regras" && <Regras />}
         {tab === "admin" && ehAdmin && <Admin gstate={gstate} onReload={reloadState} showToast={showToast} />}
@@ -597,6 +611,140 @@ function Especiais({ myPred, onSave, locked, oficiais }) {
         <div style={{ marginTop: 16, textAlign: "right" }}>
           <button className="btn btn-gold" onClick={() => onSave(esp)}>Salvar apostas especiais</button>
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Todos os Palpites (público) ─────────────────────────────────────── */
+function TodosPalpites({ myNome, gstate }) {
+  const [aba, setAba] = useState("jogos");
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    api.get("/api/predictions/todos").then(setData).catch(() => setData({ placares: [], especiais: [] }));
+  }, []);
+
+  if (!data) return <div className="note">Carregando palpites…</div>;
+
+  const { placares, especiais } = data;
+
+  // Agrupar por jogo
+  const porJogo = {};
+  for (const p of placares) {
+    if (!porJogo[p.match_id]) porJogo[p.match_id] = { info: p, apostas: [] };
+    porJogo[p.match_id].apostas.push(p);
+  }
+  const jogosOrdenados = Object.values(porJogo).sort((a, b) => new Date(a.info.kickoff) - new Date(b.info.kickoff));
+
+  // Agrupar especiais por usuário
+  const porUsuario = {};
+  for (const e of especiais) {
+    if (!porUsuario[e.user_nome]) porUsuario[e.user_nome] = {};
+    porUsuario[e.user_nome][e.chave] = e.valor;
+  }
+  const usuariosEsp = Object.entries(porUsuario).sort(([a], [b]) => a.localeCompare(b));
+
+  function classePlacar(p, info) {
+    if (info.res_m == null) return null;
+    const dm = p.gols_m - p.gols_v, dr = info.res_m - info.res_v;
+    if (p.gols_m === info.res_m && p.gols_v === info.res_v) return "pp-exato";
+    if (Math.sign(dm) === Math.sign(dr) && dm === dr) return "pp-inter";
+    if (Math.sign(dm) === Math.sign(dr)) return "pp-min";
+    return "pp-erro";
+  }
+
+  const cores = { "pp-exato": "var(--exato)", "pp-inter": "var(--inter)", "pp-min": "var(--min)", "pp-erro": "var(--danger)" };
+
+  return (
+    <div>
+      <div className="subtabs">
+        <button className={"subtab"+(aba==="jogos"?" on":"")} onClick={() => setAba("jogos")}>Por jogo</button>
+        <button className={"subtab"+(aba==="especiais"?" on":"")} onClick={() => setAba("especiais")}>Apostas especiais</button>
+        <button className="btn btn-ghost" style={{ marginLeft:"auto", padding:"6px 12px", fontSize:12.5 }}
+          onClick={() => api.get("/api/predictions/todos").then(setData)}>↻</button>
+      </div>
+
+      {aba === "jogos" && (
+        <>
+          <div className="note">
+            <b>{placares.length}</b> palpite(s) em <b>{jogosOrdenados.length}</b> jogo(s). Palpites ficam visíveis após o jogo travar (5 min antes do apito).
+          </div>
+          {jogosOrdenados.length === 0 && <div className="note">Nenhum palpite registrado ainda.</div>}
+          {jogosOrdenados.map(({ info, apostas }) => {
+            const kd = new Date(info.kickoff);
+            const dataFmt = isNaN(kd) ? "" : kd.toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" });
+            const temResultado = info.res_m != null;
+            // Só mostra palpites depois que o jogo travou (kickoff - 5min)
+            const travado = Date.now() >= kd.getTime() - 5 * 60 * 1000;
+            return (
+              <div key={info.match_id} className="card" style={{ marginBottom: 12 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom: travado ? 10 : 0 }}>
+                  <div>
+                    <span className="chip" style={{ marginRight: 8 }}>{info.grupo ? `Grupo ${info.grupo}` : info.fase}</span>
+                    <b>{flag(info.mandante)} {info.mandante} × {info.visitante} {flag(info.visitante)}</b>
+                  </div>
+                  <div style={{ fontSize: 12, color:"var(--muted)", textAlign:"right" }}>
+                    {dataFmt}
+                    {temResultado && <div style={{ color:"var(--chalk)", fontWeight:700 }}>{info.res_m} × {info.res_v}</div>}
+                  </div>
+                </div>
+                {!travado ? (
+                  <div style={{ fontSize: 12, color:"var(--muted)", marginTop: 6 }}>🔒 Palpites revelados após o jogo travar</div>
+                ) : (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap: 8, marginTop: 4 }}>
+                    {apostas.map((a) => {
+                      const cls = classePlacar(a, info);
+                      const col = cls ? cores[cls] : "var(--muted)";
+                      const euSou = a.user_nome === myNome;
+                      return (
+                        <div key={a.user_id} style={{
+                          background: euSou ? "rgba(245,184,46,.08)" : "var(--surface2)",
+                          border: `1px solid ${euSou ? "rgba(245,184,46,.4)" : col+"30"}`,
+                          borderRadius: 10, padding:"6px 12px", minWidth: 110
+                        }}>
+                          <div style={{ fontSize:14, fontWeight:700, color: col || "var(--chalk)", fontFamily:"'Oswald',sans-serif" }}>
+                            {a.gols_m} × {a.gols_v}
+                          </div>
+                          <div style={{ fontSize:11, color: euSou ? "var(--gold)" : "var(--muted)", marginTop:2, fontWeight: euSou ? 700 : 400 }}>
+                            {a.user_nome}{euSou ? " (você)" : ""}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {aba === "especiais" && (
+        <>
+          <div className="note"><b>{usuariosEsp.length}</b> pessoa(s) fizeram apostas especiais.</div>
+          {usuariosEsp.length === 0 && <div className="note">Nenhuma aposta especial ainda.</div>}
+          {usuariosEsp.map(([nome, bets]) => {
+            const euSou = nome === myNome;
+            return (
+              <div key={nome} className="card" style={{ marginBottom: 10, borderColor: euSou ? "rgba(245,184,46,.4)" : undefined }}>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10, color: euSou ? "var(--gold)" : "var(--chalk)" }}>
+                  {nome}{euSou ? " (você)" : ""}
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
+                  {ESPECIAIS_DEFS.map((d) => (
+                    <div key={d.key} style={{ background:"var(--surface2)", borderRadius:10, padding:"8px 12px" }}>
+                      <div style={{ fontSize:10, color:"var(--muted)", textTransform:"uppercase", letterSpacing:".05em" }}>{d.label}</div>
+                      <div style={{ fontSize:13, fontWeight:600, marginTop:4 }}>
+                        {bets[d.key] || <span style={{ color:"var(--danger)" }}>não preenchido</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </>
       )}
     </div>
   );

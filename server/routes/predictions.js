@@ -3,12 +3,11 @@ import { auth } from "../middleware.js";
 import {
   upsertPrediction, getPredictionsByUser,
   upsertSpecialBet, getSpecialBetsByUser,
-  getMatch, getConfig, primeiroKickoffDaRodada,
+  getMatch, getConfig, getDb,
 } from "../db.js";
 import { ESPECIAIS_DEADLINE } from "../../shared/data.js";
 
 const router = express.Router();
-const ABERTURA_DIAS = parseInt(process.env.ABERTURA_RODADA_DIAS || "5");
 const LOCK_ANTES_MS = 5 * 60 * 1000; // 5 min antes do kickoff
 
 // GET /api/predictions  — palpites do usuário logado
@@ -36,16 +35,6 @@ router.post("/placar", auth, (req, res) => {
   if (agora >= kickoff - LOCK_ANTES_MS)
     return res.status(409).json({ erro: "Palpite travado — menos de 5 minutos para o apito." });
 
-  // Rodada precisa estar aberta (só grupos)
-  if (jogo.fase === "grupos" && jogo.rodada) {
-    const primeiroKick = primeiroKickoffDaRodada(jogo.fase, jogo.rodada);
-    if (primeiroKick) {
-      const abre = new Date(primeiroKick).getTime() - ABERTURA_DIAS * 86400 * 1000;
-      if (agora < abre)
-        return res.status(409).json({ erro: "Palpites desta rodada ainda não abriram." });
-    }
-  }
-
   upsertPrediction(req.user.id, matchId, parseInt(m), parseInt(v));
   return res.json({ ok: true });
 });
@@ -65,6 +54,29 @@ router.post("/especiais", auth, (req, res) => {
     if (valor) upsertSpecialBet(req.user.id, chave, String(valor));
   }
   return res.json({ ok: true });
+});
+
+// GET /api/predictions/todos — todos os palpites (qualquer usuário logado)
+router.get("/todos", auth, (req, res) => {
+  const db = getDb();
+  const placares = db.prepare(`
+    SELECT p.match_id, p.gols_m, p.gols_v, p.updated_at,
+           u.id AS user_id, u.nome AS user_nome,
+           m.mandante, m.visitante, m.kickoff, m.fase, m.grupo,
+           r.gols_m AS res_m, r.gols_v AS res_v
+    FROM predictions p
+    JOIN users u ON u.id = p.user_id
+    JOIN matches m ON m.id = p.match_id
+    LEFT JOIN results r ON r.match_id = p.match_id
+    ORDER BY m.kickoff, u.nome
+  `).all();
+  const especiais = db.prepare(`
+    SELECT sb.user_id, sb.chave, sb.valor, u.nome AS user_nome
+    FROM special_bets sb
+    JOIN users u ON u.id = sb.user_id
+    ORDER BY u.nome, sb.chave
+  `).all();
+  return res.json({ placares, especiais });
 });
 
 export default router;
