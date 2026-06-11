@@ -1,6 +1,5 @@
 import express from "express";
 import { getAllMatches, getAllResults, getConfig } from "../db.js";
-import { ESPECIAIS_DEADLINE } from "../../shared/data.js";
 
 const router = express.Router();
 
@@ -14,8 +13,8 @@ router.get("/", (req, res) => {
   const especiaisOficiais = getConfig("especiaisOficiais") ?? {};
   const lastSync = getConfig("lastSync") ?? null;
 
-  const espTravadas = Date.now() >= new Date(ESPECIAIS_DEADLINE).getTime() || copaComecou;
-  return res.json({ matches, results: resultsMap, copaComecou, espTravadas, especiaisDeadline: ESPECIAIS_DEADLINE, especiaisOficiais, lastSync });
+  // Apostas especiais travam só quando o admin apertar "Travar especiais"
+  return res.json({ matches, results: resultsMap, copaComecou, espTravadas: copaComecou, especiaisOficiais, lastSync });
 });
 
 export default router;

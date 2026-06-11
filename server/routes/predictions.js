@@ -5,7 +5,6 @@ import {
   upsertSpecialBet, getSpecialBetsByUser,
   getMatch, getConfig, getDb,
 } from "../db.js";
-import { ESPECIAIS_DEADLINE } from "../../shared/data.js";
 
 const router = express.Router();
 const LOCK_ANTES_MS = 5 * 60 * 1000; // 5 min antes do kickoff
@@ -28,11 +27,8 @@ router.post("/placar", auth, (req, res) => {
   const jogo = getMatch(matchId);
   if (!jogo) return res.status(404).json({ erro: "Jogo não encontrado." });
 
-  const agora = Date.now();
   const kickoff = new Date(jogo.kickoff).getTime();
-
-  // Trava 5 minutos antes do apito
-  if (agora >= kickoff - LOCK_ANTES_MS)
+  if (Date.now() >= kickoff - LOCK_ANTES_MS)
     return res.status(409).json({ erro: "Palpite travado — menos de 5 minutos para o apito." });
 
   upsertPrediction(req.user.id, matchId, parseInt(m), parseInt(v));
@@ -41,10 +37,9 @@ router.post("/placar", auth, (req, res) => {
 
 // POST /api/predictions/especiais  — salvar apostas especiais
 router.post("/especiais", auth, (req, res) => {
-  const prazoPassou = Date.now() >= new Date(ESPECIAIS_DEADLINE).getTime();
-  const copaComecou = getConfig("copaComecou") ?? false;
-  if (prazoPassou || copaComecou)
-    return res.status(409).json({ erro: "Apostas especiais encerradas — prazo era 11/06 às 16h." });
+  // Trava apenas quando o admin ativar "Copa começou"
+  if (getConfig("copaComecou"))
+    return res.status(409).json({ erro: "Apostas especiais encerradas pelo administrador." });
 
   const { especiais } = req.body || {};
   if (!especiais || typeof especiais !== "object")
