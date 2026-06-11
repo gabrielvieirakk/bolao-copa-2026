@@ -336,6 +336,17 @@ export default function App() {
       .catch(() => {});
   }, [session]);
 
+  // Logout automático quando token é rejeitado pelo servidor
+  useEffect(() => {
+    const handler = () => {
+      setSession(null);
+      setMyPred({ placares: {}, especiais: {} });
+      setTab("jogos");
+    };
+    window.addEventListener("bolao:logout", handler);
+    return () => window.removeEventListener("bolao:logout", handler);
+  }, []);
+
   const todosJogos = gstate?.matches || [];
 
   const isLocked = useCallback((j) => {

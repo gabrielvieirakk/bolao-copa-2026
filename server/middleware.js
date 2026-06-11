@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { getUserById } from "./db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "bolao-dev-secret-change-me";
 
@@ -7,7 +8,10 @@ export function auth(req, res, next) {
   if (!header?.startsWith("Bearer "))
     return res.status(401).json({ erro: "Não autenticado." });
   try {
-    req.user = jwt.verify(header.slice(7), JWT_SECRET);
+    const payload = jwt.verify(header.slice(7), JWT_SECRET);
+    const user = getUserById(payload.id);
+    if (!user) return res.status(401).json({ erro: "Sessão expirada — faça login novamente." });
+    req.user = { id: user.id, email: user.email, isAdmin: !!user.is_admin };
     next();
   } catch {
     return res.status(401).json({ erro: "Token inválido ou expirado." });

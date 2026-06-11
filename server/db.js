@@ -78,6 +78,9 @@ export function createUser(email, nome, senhaHash) {
   ).run(email.toLowerCase(), nome, senhaHash, isFirst ? 1 : 0);
   return db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase());
 }
+export function getUserById(id) {
+  return getDb().prepare("SELECT * FROM users WHERE id = ?").get(id);
+}
 export function getAllUsers() {
   return getDb().prepare("SELECT id, email, nome, is_admin, created_at FROM users").all();
 }

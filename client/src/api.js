@@ -17,6 +17,14 @@ async function request(method, path, body) {
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
+  if (res.status === 401) {
+    localStorage.removeItem("bolao_token");
+    localStorage.removeItem("bolao_nome");
+    localStorage.removeItem("bolao_admin");
+    window.dispatchEvent(new Event("bolao:logout"));
+    throw new Error("Sessão expirada — faça login novamente.");
+  }
+
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.erro || `HTTP ${res.status}`);
   return data;
