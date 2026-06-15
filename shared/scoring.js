@@ -1,11 +1,11 @@
 export const PONTOS = {
-  grupos:   { exato: 10, inter: 6,  min: 3  },
-  "16avos": { exato: 14, inter: 8,  min: 4  },
-  oitavas:  { exato: 18, inter: 11, min: 5  },
-  quartas:  { exato: 24, inter: 14, min: 7  },
-  semi:     { exato: 32, inter: 18, min: 9  },
-  terceiro: { exato: 38, inter: 22, min: 11 },
-  final:    { exato: 50, inter: 30, min: 15 },
+  grupos:   { exato: 3, inter: 2, min: 1 },
+  "16avos": { exato: 3, inter: 2, min: 1 },
+  oitavas:  { exato: 3, inter: 2, min: 1 },
+  quartas:  { exato: 3, inter: 2, min: 1 },
+  semi:     { exato: 3, inter: 2, min: 1 },
+  terceiro: { exato: 3, inter: 2, min: 1 },
+  final:    { exato: 3, inter: 2, min: 1 },
 };
 
 export const norm = (s) =>
