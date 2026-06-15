@@ -796,7 +796,7 @@ function Ranking({ myId }) {
                   {l.nome === myId && <span className="tag tag-gold">você</span>}
                   {l.exatos > 0 && l.exatos === maxExatos && <span className="tag tag-gold">🎯 cravador</span>}
                 </div>
-                <div className="rank-sub">{l.exatos} exato(s) · {l.placaresPts} jogos{l.especiaisPts > 0 ? ` · ${l.especiaisPts} especiais` : ""}</div>
+                <div className="rank-sub">{l.exatos} exato(s) · {l.jogosCount} jogo(s){l.especiaisPts > 0 ? ` · ${l.especiaisPts} especiais` : ""}</div>
               </div>
               <div className="rank-pts">{l.total}<small>pontos</small></div>
             </div>

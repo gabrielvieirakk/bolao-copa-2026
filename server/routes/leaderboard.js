@@ -36,7 +36,7 @@ router.get("/", auth, (req, res) => {
   const linhas = users.map((u) => {
     const uPreds = predsByUser[u.id] || {};
     const uEsp = especiaisByUser[u.id] || {};
-    let placaresPts = 0, exatos = 0, especiaisPts = 0;
+    let placaresPts = 0, exatos = 0, especiaisPts = 0, jogosCount = 0;
 
     for (const [jid, palpite] of Object.entries(uPreds)) {
       const res = resultsMap[jid];
@@ -44,6 +44,7 @@ router.get("/", auth, (req, res) => {
       if (res && jogo && PONTOS[jogo.fase]) {
         placaresPts += pontuarJogo(palpite, res, PONTOS[jogo.fase]);
         if (classePontuacao(palpite, res) === "exato") exatos++;
+        jogosCount++;
       }
     }
 
@@ -57,7 +58,7 @@ router.get("/", auth, (req, res) => {
 
     return {
       id: u.id, nome: u.nome, isAdmin: !!u.is_admin,
-      placaresPts, especiaisPts, exatos,
+      placaresPts, especiaisPts, exatos, jogosCount,
       total: placaresPts + especiaisPts,
     };
   });
