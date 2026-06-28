@@ -215,3 +215,23 @@ export const JOGOS_GRUPOS = [
   { id:"g-L-4", fase:"grupos", grupo:"L", rodada:3, mandante:"Panamá",             visitante:"Inglaterra",          kickoff:"2026-06-27T21:00:00Z" },
   { id:"g-L-5", fase:"grupos", grupo:"L", rodada:3, mandante:"Croácia",            visitante:"Gana",                kickoff:"2026-06-27T21:00:00Z" },
 ];
+
+// Calendário oficial FIFA Copa do Mundo 2026 — 16-avos de final (horários em UTC, BRT = UTC-3)
+export const JOGOS_16AVOS = [
+  { id:"16-0",  fase:"16avos", mandante:"África do Sul",         visitante:"Canadá",                kickoff:"2026-06-28T19:00:00Z" },
+  { id:"16-1",  fase:"16avos", mandante:"Brasil",                visitante:"Japão",                 kickoff:"2026-06-29T17:00:00Z" },
+  { id:"16-2",  fase:"16avos", mandante:"Alemanha",              visitante:"Paraguai",              kickoff:"2026-06-29T20:30:00Z" },
+  { id:"16-3",  fase:"16avos", mandante:"Holanda",               visitante:"Marrocos",              kickoff:"2026-06-30T01:00:00Z" },
+  { id:"16-4",  fase:"16avos", mandante:"Costa do Marfim",       visitante:"Noruega",               kickoff:"2026-06-30T17:00:00Z" },
+  { id:"16-5",  fase:"16avos", mandante:"França",                visitante:"Suécia",                kickoff:"2026-06-30T21:00:00Z" },
+  { id:"16-6",  fase:"16avos", mandante:"México",                visitante:"Equador",               kickoff:"2026-07-01T01:00:00Z" },
+  { id:"16-7",  fase:"16avos", mandante:"Inglaterra",            visitante:"RD Congo",              kickoff:"2026-07-01T16:00:00Z" },
+  { id:"16-8",  fase:"16avos", mandante:"Bélgica",               visitante:"Senegal",               kickoff:"2026-07-01T20:00:00Z" },
+  { id:"16-9",  fase:"16avos", mandante:"Estados Unidos",        visitante:"Bósnia e Herzegovina",  kickoff:"2026-07-02T00:00:00Z" },
+  { id:"16-10", fase:"16avos", mandante:"Espanha",               visitante:"Áustria",               kickoff:"2026-07-02T19:00:00Z" },
+  { id:"16-11", fase:"16avos", mandante:"Portugal",              visitante:"Croácia",               kickoff:"2026-07-02T23:00:00Z" },
+  { id:"16-12", fase:"16avos", mandante:"Suíça",                 visitante:"Argélia",               kickoff:"2026-07-03T03:00:00Z" },
+  { id:"16-13", fase:"16avos", mandante:"Austrália",             visitante:"Egito",                 kickoff:"2026-07-03T18:00:00Z" },
+  { id:"16-14", fase:"16avos", mandante:"Argentina",             visitante:"Cabo Verde",            kickoff:"2026-07-03T22:00:00Z" },
+  { id:"16-15", fase:"16avos", mandante:"Colômbia",              visitante:"Gana",                  kickoff:"2026-07-04T01:30:00Z" },
+];
