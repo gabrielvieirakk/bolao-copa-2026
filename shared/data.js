@@ -235,3 +235,15 @@ export const JOGOS_16AVOS = [
   { id:"16-14", fase:"16avos", mandante:"Argentina",             visitante:"Cabo Verde",            kickoff:"2026-07-03T22:00:00Z" },
   { id:"16-15", fase:"16avos", mandante:"Colômbia",              visitante:"Gana",                  kickoff:"2026-07-04T01:30:00Z" },
 ];
+
+// Calendário oficial FIFA Copa do Mundo 2026 — Oitavas de final (horários em UTC, BRT = UTC-3)
+export const JOGOS_OITAVAS = [
+  { id:"oit-0", fase:"oitavas", mandante:"Canadá",          visitante:"Marrocos",   kickoff:"2026-07-04T17:00:00Z" },
+  { id:"oit-1", fase:"oitavas", mandante:"Paraguai",        visitante:"França",     kickoff:"2026-07-04T21:00:00Z" },
+  { id:"oit-2", fase:"oitavas", mandante:"Brasil",          visitante:"Noruega",    kickoff:"2026-07-05T20:00:00Z" },
+  { id:"oit-3", fase:"oitavas", mandante:"México",          visitante:"Inglaterra", kickoff:"2026-07-06T00:00:00Z" },
+  { id:"oit-4", fase:"oitavas", mandante:"Portugal",        visitante:"Espanha",    kickoff:"2026-07-06T19:00:00Z" },
+  { id:"oit-5", fase:"oitavas", mandante:"Estados Unidos",  visitante:"Bélgica",    kickoff:"2026-07-07T00:00:00Z" },
+  { id:"oit-6", fase:"oitavas", mandante:"Argentina",       visitante:"Egito",      kickoff:"2026-07-07T16:00:00Z" },
+  { id:"oit-7", fase:"oitavas", mandante:"Suíça",           visitante:"Colômbia",   kickoff:"2026-07-07T20:00:00Z" },
+];
