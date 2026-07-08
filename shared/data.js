@@ -247,3 +247,11 @@ export const JOGOS_OITAVAS = [
   { id:"oit-6", fase:"oitavas", mandante:"Argentina",       visitante:"Egito",      kickoff:"2026-07-07T16:00:00Z" },
   { id:"oit-7", fase:"oitavas", mandante:"Suíça",           visitante:"Colômbia",   kickoff:"2026-07-07T20:00:00Z" },
 ];
+
+// Calendário oficial FIFA Copa do Mundo 2026 — Quartas de final (horários em UTC, BRT = UTC-3)
+export const JOGOS_QUARTAS = [
+  { id:"qrt-0", fase:"quartas", mandante:"França",    visitante:"Marrocos",   kickoff:"2026-07-09T20:00:00Z" },
+  { id:"qrt-1", fase:"quartas", mandante:"Espanha",   visitante:"Bélgica",    kickoff:"2026-07-10T19:00:00Z" },
+  { id:"qrt-2", fase:"quartas", mandante:"Noruega",   visitante:"Inglaterra", kickoff:"2026-07-11T21:00:00Z" },
+  { id:"qrt-3", fase:"quartas", mandante:"Argentina", visitante:"Suíça",      kickoff:"2026-07-12T01:00:00Z" },
+];
