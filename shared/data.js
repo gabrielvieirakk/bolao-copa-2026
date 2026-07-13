@@ -255,3 +255,9 @@ export const JOGOS_QUARTAS = [
   { id:"qrt-2", fase:"quartas", mandante:"Noruega",   visitante:"Inglaterra", kickoff:"2026-07-11T21:00:00Z" },
   { id:"qrt-3", fase:"quartas", mandante:"Argentina", visitante:"Suíça",      kickoff:"2026-07-12T01:00:00Z" },
 ];
+
+// Calendário oficial FIFA Copa do Mundo 2026 — Semifinais (horários em UTC, BRT = UTC-3)
+export const JOGOS_SEMI = [
+  { id:"semi-0", fase:"semi", mandante:"França",    visitante:"Espanha",   kickoff:"2026-07-14T19:00:00Z" },
+  { id:"semi-1", fase:"semi", mandante:"Inglaterra", visitante:"Argentina", kickoff:"2026-07-15T19:00:00Z" },
+];
